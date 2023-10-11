@@ -8,14 +8,12 @@ jobs:
       fail-fast: false
       matrix:
         roleToken:
-          - "rg_oidc_akr_wdk2j3ghyoq72dxv1o8e"
+          - "rg_oidc_akr_4w2msawg1kstcox9nqga"
         gem-server:
           - "https://rubygems.org"
         include:
-          - roleToken: rg_oidc_akr_af3qvswoz4sa1xqv48sc
+          - roleToken: rg_oidc_akr_4w2msawg1kstcox9nqga
             gem-server: "https://oidc-api-token.rubygems.org"
-          - roleToken: rg_oidc_akr_zsrkdgeq83dodvvs2qvx
-            gem-server: "https://staging.rubygems.org"
     permissions:
       contents: write
       id-token: write
