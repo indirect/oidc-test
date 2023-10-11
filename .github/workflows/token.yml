@@ -4,37 +4,35 @@ on:
 jobs:
   job:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        roleToken:
-          - "rg_oidc_akr_4w2msawg1kstcox9nqga"
-        gem-server:
-          - "https://rubygems.org"
-        include:
-          - roleToken: rg_oidc_akr_4w2msawg1kstcox9nqga
-            gem-server: "https://oidc-api-token.rubygems.org"
     permissions:
-      contents: write
-      id-token: write
+      contents: write # This is required to push the release commit to the repository
+      id-token: write # This is required to get the OIDC token
     steps:
+      # Set up a RubyGems.org API token via OIDC
       - uses: rubygems/configure-rubygems-credentials@main
         with:
-          role-to-assume: ${{ matrix.roleToken }}
-          gem-server: ${{ matrix.gem-server }}
+          role-to-assume: rg_oidc_akr_4w2msawg1kstcox9nqga # The role token of the API key role you created in step 2
+          gem-server: "https://oidc-api-token.rubygems.org" # this is the default value
+          audience: "oidc-api-token.rubygems.org" # this is the default value
+
+      # Check out the repository
       - uses: actions/checkout@v3
+
+      # Configure git so that the release commit is attributed to the user who pushed it
+      # and the commit created by `bundle exec rake release` will succeed & can be pushed
       - name: Set remote URL
         run: |
           git config --global user.email "$(git log -1 --pretty=format:'%ae')"
           git config --global user.name "$(git log -1 --pretty=format:'%an')"
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
+
+      # Set up Ruby
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2.1"
           bundler-cache: true
+
+      # Release the gem!
       - name: Release
         run: bundle exec rake release
-        env:
-          TAG_PREFIX: "${{ matrix.roleToken }}-"
-          GEM_HOST: "${{ matrix.gem-server }}"
