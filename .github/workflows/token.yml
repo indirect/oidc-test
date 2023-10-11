@@ -4,21 +4,14 @@ on:
 jobs:
   job:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        roleToken:
-          - "rg_oidc_akr_4w2msawg1kstcox9nqga"
-        gem-server:
-          - "https://oidc-api-token.rubygems.org"
     permissions:
       contents: write
       id-token: write
     steps:
       - uses: rubygems/configure-rubygems-credentials@main
         with:
-          role-to-assume: ${{ matrix.roleToken }}
-          gem-server: ${{ matrix.gem-server }}
+          role-to-assume: "rg_oidc_akr_4w2msawg1kstcox9nqga"
+          gem-server: "https://oidc-api-token.rubygems.org"
           audience: "oidc-api-token.rubygems.org"
       - uses: actions/checkout@v3
       - name: Set remote URL
@@ -34,5 +27,4 @@ jobs:
       - name: Release
         run: bundle exec rake release
         env:
-          TAG_PREFIX: "${{ matrix.roleToken }}-"
-          GEM_HOST: "${{ matrix.gem-server }}"
+          GEM_HOST: "https://oidc-api-token.rubygems.org"
